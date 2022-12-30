@@ -1,79 +1,33 @@
-// C++ program to illustrate
-// page faults in LFU
-
 #include <bits/stdc++.h>
-#include<cstdlib>
+
 using namespace std;
 
-/* Counts no. of page faults */
-int pageFaults(int n, int c, int pages[])
-{
-    // Initialise count to 0
-    int count = 0;
-
-    // To store elements in memory of size c
-    vector<int> v;
-    // To store frequency of pages
-    unordered_map<int, int> mp;
-
-    int i;
-    for (i = 0; i <= n - 1; i++) {
-
-        // Find if element is present in memory or not
-        auto it = find(v.begin(), v.end(), pages[i]);
-
-        // If element is not present
-        if (it == v.end()) {
-
-            // If memory is full
-            if (v.size() == c) {
-
-                // Decrease the frequency
-                mp[v[0]]--;
-
-                // Remove the first element as
-                // It is least frequently used
-                v.erase(v.begin());
-            }
-
-            // Add the element at the end of memory
-            v.push_back(pages[i]);
-            // Increase its frequency
-            mp[pages[i]]++;
-
-            // Increment the count
-            count++;
-        }
-        else {
-
-            // If element is present
-            // Remove the element
-            // And add it at the end
-            // Increase its frequency
-            mp[pages[i]]++;
-            v.erase(it);
-            v.push_back(pages[i]);
-        }
-
-        // Compare frequency with other pages
-        // starting from the 2nd last page
-        int k = v.size() - 2;
-
-        // Sort the pages based on their frequency
-        // And time at which they arrive
-        // if frequency is same
-        // then, the page arriving first must be placed first
-        while (mp[v[k]] > mp[v[k + 1]] && k > -1) {
-            swap(v[k + 1], v[k]);
-            k--;
+int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, const int capacity) {
+    int countLeasts = 1;
+    for(int i=0 ; i<capacity ; i++) {
+        // frequencies[0].second <- least value because sorted ascending
+        if(frequencies[i].second == frequencies[0].second) {
+            countLeasts++;
         }
     }
-
-    // Return total page faults
-    return count;
+    if(countLeasts == 1) {
+        return frequencies[0].first;
+    } else {
+        // find which page came the first
+        for(auto page:pages){
+            for(int j=0 ; j<countLeasts ; j++) {
+                if(page == frequencies[j].first) {
+                    return page;
+                }
+            }
+        }
+    }
 }
 
-/* Driver program to test pageFaults function*/
+bool IsEqual (pair<int, int> i) {
+    return i.second == 1;
+}
+
 int main()
 {
     int fault = 0;
@@ -94,7 +48,10 @@ int main()
     }
 
     for(auto page: pages){
-        if(storage[0] == -1) cout << "storage[0] empty\n";
+        std::sort( frequencies.begin(), frequencies.end(),
+                   [](const std::pair<int, int>& f, const std::pair<int, int>& s) {
+                       return f.second < s.second;
+                   });
 
         // Fill Capacity blanks
         bool seated = false;
@@ -107,19 +64,33 @@ int main()
         }
         //Compare frequencies
         if(!seated) {
-            for(int i=0 ; i<capacity ; i++) {
-                int pageNumber = storage[i];
+            // Equal frequencies so Compare order of arrival
+            int temp = findLeast(frequencies,pages, capacity);
+            cout << "For page: " << page << " findLeast returned: " << temp << '\n';
 
-                std::sort( frequencies.begin(), frequencies.end(),
-                [](const std::pair<int, int>& f, const std::pair<int, int>& s) {
-                    return f.first < s.first;
-                });
-                cout << "frequencies[0]: " << frequencies[0].first
-                << ": " << frequencies[0].second << '\n';
-            }
+            // Frequencies that .second === 'temp' --
+            // temp = storage.at(
+            //find element with value returned by 'findLeast()'
+            std::vector<pair<int, int>>::iterator frequencyToDecrease = find_if(frequencies.begin(), frequencies.end(), [temp](pair<int, int> i) {
+                return i.first == temp;
+            });
+            frequencyToDecrease->second--;
+            cout << "frequencyToDecrease.first: " << frequencyToDecrease->first << "   |   ";
+            cout << "frequencyToDecrease.second: " << frequencyToDecrease->second << '\n';
+
+            cout << "storage.at(find(storage.begin(), storage.end(), temp) != storage.end()): "
+            << storage.at(find(storage.begin(), storage.end(), temp) != storage.end()) << '\n';
+
+            storage.at(
+                    //find element with value returned by 'findLeast()'
+                    std::find(storage.begin(), storage.end(), temp) != storage.end()
+            ) = page;
+
+
+
+//                     std::vector<pair<int, int>>::iterator it = find_if(frequencies.begin(), frequencies.end(), IsEqual);
         }
 
-            // (if equal frequencies) Compare order of arrival
 
         // Count/create Frequency
         bool existFrequency = false;
@@ -136,13 +107,12 @@ int main()
         else pageHit++;
     }
 
-    for(auto strg: storage){
-        cout << "strg: " << strg <<'\n';
+    for(auto frequency: frequencies){
+        cout << "Frequency " << frequency.first << " " << frequency.second << '\n';
     }
-//    cout << "Page Faults = " << pageFaults(n, c, pages)
-//         << endl;
-//    cout << "Page Hits = " << n - pageFaults(n, c, pages);
+
+    cout << '\n';
+    cout << "Page Faults = " << fault << '\n';
+    cout << "Page Hits = " << pageHit << '\n';
     return 0;
 }
-
-// This code is contributed by rajsanghavi9.

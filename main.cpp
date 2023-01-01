@@ -2,15 +2,40 @@
 
 using namespace std;
 
-int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, const int capacity) {
+// Find which from "storage" number to replace
+int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, const int capacity, vector<int> storage) {
     int countLeasts = 1;
-    for(int i=0 ; i<capacity ; i++) {
-        // frequencies[0].second <- least value because sorted ascending
-        if(frequencies[i].second == frequencies[0].second) {
-            countLeasts++;
+//    for(int i=1 ; i<frequencies.size() ; i++) {
+//        // frequencies[0].second <- least value because sorted ascending
+//        if(frequencies[i].second == frequencies[0].second) {
+//            cout << "(inside findLeast:) frequencies[i].second == frequencies[0].second  ("
+//            << frequencies[0].second << ")\n";
+//            countLeasts++;
+//        }
+//    }
+
+    int storageFreq[storage.size()];
+
+    for(int j=0 ; j<storage.size() ; j++) {
+        for (int i = 0; i < frequencies.size(); i++) {
+            if (frequencies[i].first == storage[j]) {
+                storageFreq[j] = frequencies[i].second;
+                cout << "Filling in storageFreq [" << j << "] with value " << frequencies[i].second << '\n';
+            }
         }
     }
+    for(int i=1 ; i<storage.size(); i++) { // Through storageFreq[]
+        if(storageFreq[i] == storageFreq[i-1]) {
+            cout << "(inside findLeast:) storageFreq[i] == storageFreq[i-1]  ("
+            << storageFreq[i-1]  << ")\n";
+            countLeasts++;
+        } else {
+            break; // To avoid error in case (frequencies looks like): 1, 1, 2, 2, 2
+        }
+    }
+
     if(countLeasts == 1) {
+        cout << "Returning countLeasts == 1\n";
         return frequencies[0].first;
     } else {
         // find which page came the first
@@ -40,14 +65,36 @@ int main()
     int n = pages.size();
 
     vector <pair<int,int>> frequencies={
-            {1,0},{2,0},{3,4}
+//            {1,0},{2,0},{3,4}
+//            {0, 0}
     };
 
-    for(int i=0 ; i<pages.size() ; i++){
-        if(frequencies[i].first == pages[i]) continue;
-    }
+//    for(int i=0 ; i<pages.size() ; i++){
+//        if(frequencies[i].first == pages[i]) continue;
+//    }
 
     for(auto page: pages){
+        cout << "\nStorage is: ";
+        for(int i=0; i<storage.size() ; i++) cout << storage[i] << ' ';
+        cout << '\n';
+
+        cout  << "\nPage " << page << '\n';
+
+        // Count/create Frequency
+        bool existFrequency = false;
+        for(int i=0 ; i<frequencies.size() ; i++){
+            if(frequencies[i].first == page) {
+                existFrequency = true;
+                frequencies[i].second++;
+                break;
+            }
+        }
+        if(!existFrequency) {
+            cout << "Making pair for page " << page << '\n';
+            frequencies.push_back(make_pair(page, 1));
+            cout << "frequencies.end(): " << frequencies.back().first << " " << frequencies.back().second << '\n';
+        }
+
         std::sort( frequencies.begin(), frequencies.end(),
                    [](const std::pair<int, int>& f, const std::pair<int, int>& s) {
                        return f.second < s.second;
@@ -65,7 +112,7 @@ int main()
         //Compare frequencies
         if(!seated) {
             // Equal frequencies so Compare order of arrival
-            int temp = findLeast(frequencies,pages, capacity);
+            int temp = findLeast(frequencies,pages, capacity, storage);
             cout << "For page: " << page << " findLeast returned: " << temp << '\n';
 
             // Frequencies that .second === 'temp' --
@@ -75,33 +122,28 @@ int main()
                 return i.first == temp;
             });
             frequencyToDecrease->second--;
-            cout << "frequencyToDecrease.first: " << frequencyToDecrease->first << "   |   ";
-            cout << "frequencyToDecrease.second: " << frequencyToDecrease->second << '\n';
+            cout << "DECREASED frequencyToDecrease: { first: " << frequencyToDecrease->first << "  |  second: "
+            << frequencyToDecrease->second << " } " << '\n';
 
-            cout << "storage.at(find(storage.begin(), storage.end(), temp) != storage.end()): "
-            << storage.at(find(storage.begin(), storage.end(), temp) != storage.end()) << '\n';
-
-            storage.at(
-                    //find element with value returned by 'findLeast()'
-                    std::find(storage.begin(), storage.end(), temp) != storage.end()
-            ) = page;
+            for (int i = 0; i < storage.size(); ++i) {
+                if(storage[i] == temp) {
+                    cout << "Storage change: " << storage[i] << " to " << page << '\n';
+                    storage[i] = page;
+                }
+            }
+//            cout << "storage.at(find(storage.begin(), storage.end(), temp) != storage.end()): "
+//            << storage.at(find(storage.begin(), storage.end(), temp) != storage.end()) << '\n';
+//
+//            storage.at(
+//                    //find element with value returned by 'findLeast()'
+//                    std::find(storage.begin(), storage.end(), temp) != storage.end()
+//            ) = page;
 
 
 
 //                     std::vector<pair<int, int>>::iterator it = find_if(frequencies.begin(), frequencies.end(), IsEqual);
         }
 
-
-        // Count/create Frequency
-        bool existFrequency = false;
-        for(int i=0 ; i<frequencies.size() ; i++){
-            if(frequencies[i].first == page) {
-                existFrequency = true;
-                frequencies[i].second++;
-                break;
-            }
-        }
-        if(!existFrequency) frequencies.push_back(make_pair(page, 0));
 
         if(!existFrequency) fault++;
         else pageHit++;

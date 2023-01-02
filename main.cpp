@@ -13,7 +13,7 @@ int findArrayMinimum(int arr[]) {
 }
 
 // Find which from "storage" number to replace
-int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, const int capacity, vector<int> storage) {
+int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, vector<int> storage, vector<pair<int, bool>> removedPages) {
     int countLeasts = 1;
 //    for(int i=1 ; i<frequencies.size() ; i++) {
 //        // frequencies[0].second <- least value because sorted ascending
@@ -51,19 +51,28 @@ int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, const int 
         return frequencies[0].first;
     } else {
         // find which page (from storage) came first
-        for(auto page:pages){
+        for(int k=0 ; k<pages.size() ; k++){
+            cout << "(inside findLeast:) Error: Moved out of for loop. Page " << pages[k] << " \n";
             for(int i=0 ; i<storage.size() ; i++) {
-                if(page == storage[i] && storageFreq[i] == min) {
-                    cout << "(inside findLeast:) Im returning page " << page << '\n';
-                    return page;
+                if(pages[k] == 5) {
+                    cout << "Pages 5 | storageFreq[i] = " << storageFreq[i]
+                    << " | removedPages[i].first = " << removedPages[i].first
+                    << " | storage[i] = " << storage[i]
+                    << " | removedPages[i].second = " << removedPages[i].second // '4'.second is 'REMOVED'   <- to fix
+                    << '\n';
+                }
+//                for(int k=0; k<pages.size() ; k++) {
+//                    if(removedPages[k].first == storage[i]) {
+//                        cout << "Storage is " << storage[i] << " | " << (removedPages[k].second ? "removed" : "") << " \n";
+//                    }
+//                }
+
+//                removedPages[i].first is NOT storage[i]
+                if(pages[k] == storage[i] && storageFreq[i] == min && removedPages[i].second == false) {
+                    cout << "(inside findLeast:) Im returning page " << pages[k] << '\n';
+                    return pages[k];
                 }
             }
-//            for(int j=0 ; j<countLeasts ; j++) {
-//                if(page == frequencies[j].first) {
-//                    cout << "(inside findLeast:) Im returning page " << page << '\n';
-//                    return page;
-//                }
-//            }
         }
     }
 }
@@ -81,6 +90,15 @@ int main()
     vector<int> storage(capacity, -1);
 
     vector<int> pages = { 1, 2, 3, 4, 2, 1, 5 };
+    vector<pair<int, bool>> removedPages = {
+            {1, false},
+            {2, false},
+            {3, false},
+            {4, false},
+            {2, false},
+            {1, false},
+            {5, false}
+    };
     int n = pages.size();
 
     vector <pair<int,int>> frequencies={
@@ -148,12 +166,12 @@ int main()
                     return i.first == page;
                 });
                 cout << "Already in storage so frequencyToIncrease.first == " << frequencyToIncrease->first << '\n';
-//          its done before      frequencyToIncrease->second++;
+//          it is done before      frequencyToIncrease->second++;
                 cout << "INCREASED frequencyToIncrease: { first: " << frequencyToIncrease->first << "  |  second: "
                      << frequencyToIncrease->second << " } " << '\n';
             } else {
                 std::vector<pair<int, int>>::iterator frequencyToDecrease;
-                temp = findLeast(frequencies,pages, capacity, storage);
+                temp = findLeast(frequencies,pages, storage, removedPages);
                 cout << "For page -" << page << "- findLeast returned page " << temp << " from storage\n";
 
                 frequencyToDecrease = find_if(frequencies.begin(), frequencies.end(), [temp](pair<int, int> i) {
@@ -163,6 +181,15 @@ int main()
                 frequencyToDecrease->second--;
                 cout << "DECREASED frequencyToDecrease: { first: " << frequencyToDecrease->first << "  |  second: "
                 << frequencyToDecrease->second << " } " << '\n';
+
+                for(int j=0 ; j<removedPages.size() ; j++) {
+                    if(removedPages[j].first == temp && removedPages[j].second == false) {
+                        cout << "j = " << j << " | pages[j] = " << pages[j] << " | temp = " << temp << '\n';
+                        cout << "(removedPages[" << j << "].first is " << removedPages[j].first << ") Removing page\n";
+                        removedPages[j].second = true;
+                        break;
+                    }
+                }
             }
 
 

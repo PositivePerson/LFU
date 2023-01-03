@@ -52,23 +52,9 @@ int findLeast(vector<pair<int, int>> &frequencies, vector<int> pages, vector<int
     } else {
         // find which page (from storage) came first
         for(int k=0 ; k<pages.size() ; k++){
-            cout << "(inside findLeast:) Error: Moved out of for loop. Page " << pages[k] << " \n";
+//            cout << "(inside findLeast:) Error: Moved out of for loop. Page " << pages[k] << " \n";
             for(int i=0 ; i<storage.size() ; i++) {
-                if(pages[k] == 5) {
-                    cout << "Pages 5 | storageFreq[i] = " << storageFreq[i]
-                    << " | removedPages[i].first = " << removedPages[i].first
-                    << " | storage[i] = " << storage[i]
-                    << " | removedPages[i].second = " << removedPages[i].second // '4'.second is 'REMOVED'   <- to fix
-                    << '\n';
-                }
-//                for(int k=0; k<pages.size() ; k++) {
-//                    if(removedPages[k].first == storage[i]) {
-//                        cout << "Storage is " << storage[i] << " | " << (removedPages[k].second ? "removed" : "") << " \n";
-//                    }
-//                }
-
-//                removedPages[i].first is NOT storage[i]
-                if(pages[k] == storage[i] && storageFreq[i] == min && removedPages[i].second == false) {
+                if( storageFreq[i] == min && removedPages[k].first == storage[i] && removedPages[k].second == false) {
                     cout << "(inside findLeast:) Im returning page " << pages[k] << '\n';
                     return pages[k];
                 }

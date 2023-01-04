@@ -3,6 +3,7 @@
 #include "displayers.h"
 #include "findLeast.h"
 #include "generator.h"
+#include "fetchData.h"
 
 using namespace std;
 
@@ -40,15 +41,23 @@ int main()
 //            {1, false},
 //            {5, false}
 //    };
-    int pagesAmount = 3;
-    cout << "Pages amount (number): ";
-    cin >> pagesAmount;
-    cout << '\n';
-
-    cout << "----- generators -----\n";
-    vector<int> pages = generatePages(pagesAmount);
-    vector<pair<int, bool>> removedPages = generateRemoved(pages);
-    cout << "--- end of generators ---\n";
+// ---------- OR ----------
+//    int pagesAmount = 3;
+//    cout << "Pages amount (number): ";
+//    cin >> pagesAmount;
+//    cout << '\n';
+//
+//    cout << "----- generators -----\n";
+//    vector<int> pages = generatePages(pagesAmount);
+//    vector<pair<int, bool>> removedPages = generateRemoved(pages);
+//    cout << "--- end of generators ---\n";
+// ---------- OR ----------
+    vector<int> pages;
+    cout<<'\n';
+    getPagesFromFile(pages);
+    vector<pair<int, bool>> removedPages;
+    cout<<'\n';
+    getRemovedFromFile(removedPages);
 
 
     vector <pair<int,int>> frequencies;
